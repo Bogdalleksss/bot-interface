@@ -83,7 +83,7 @@ export default {
     }
   },
   async mounted() {
-    const { data } = await axios.get('http://localhost:3000/trades')
+    const { data } = await axios.get('http://185.233.187.84:3000/trades')
     this.trades = data;
   },
   computed: {
