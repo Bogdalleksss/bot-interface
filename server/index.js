@@ -5,7 +5,7 @@ import TradeModel from "./models/trade.model";
 // import socketIO from "socket.io";
 
 export default (app) => {
-  connect('mongodb://localhost:27017/arb_bot0123')
+  connect('mongodb://Admin8host:bogdanzahodi@139.180.195.205:27017/arb_bot_newbd')
     .then(() => console.log('MongoDB is connected!'));
 
   app.use(express.json());
