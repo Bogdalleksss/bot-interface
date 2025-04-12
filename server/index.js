@@ -1,12 +1,30 @@
 import express from 'express';
-import { connect } from 'mongoose';
+import { connect, set } from 'mongoose';
 const cors = require('cors');
 import TradeModel from "./models/trade.model";
 // import socketIO from "socket.io";
 
 export default (app) => {
-  connect('mongodb://Admin8host:bogdanzahodi@139.180.195.205:27017/arb_bot_newbd')
+  // mongodb://Admin8host:bogdanzahodi@139.180.195.205:27017/arb_bot_newbd
+  // mongodb://Admin8host:bogdanzahodi@139.180.195.205:27017/arb_bot_newbd
+  set("strictQuery", false)
+  connect('mongodb://admin:QGfcYjT0O-Kgf4Y@2.57.215.208:27017/arb_bot_newbd12334')
     .then(() => console.log('MongoDB is connected!'));
+
+
+  // db.createUser({
+  //   user: "admin",
+  //   pwd: "QGfcYjT0O-Kgf4Y", // Замените на надежный пароль
+  //   roles: [{ role: "readWrite", db: "arb_bot_newbd12334" }]
+  // })
+  // //
+  // db.createUser({
+  //   user: "admin",
+  //   pwd: "QGfcYjT0O-Kgf4Y", // замените на надежный пароль
+  //   roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]
+  // })
+  //
+  // arb_bot_newbd12334
 
   app.use(express.json());
   app.use(cors());
