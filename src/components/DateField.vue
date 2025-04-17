@@ -31,7 +31,7 @@
 import moment from 'moment'
 // import VueTimepicker from 'vue2-timepicker/src/vue-timepicker.vue'
 // import VueTimepicker from 'vue-time-picker'
-import VueTimepicker from '../components/Timepicker'
+import VueTimepicker from './Timepicker'
 // Main JS (in UMD format)
 // import VueTimepicker from 'vue2-timepicker'
 // CSS

@@ -18,6 +18,8 @@ const TradeSchema = new mongoose.Schema({
   profit: Number,
   land_time: Mixed,
   order_time: Mixed,
+  tips: Mixed,
+  nozomi_tips: Mixed,
   txid: String,
   status: {
     type: String,

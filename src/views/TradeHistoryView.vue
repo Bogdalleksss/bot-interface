@@ -5,6 +5,7 @@
         <p>Total Profit: {{ dataTrades.profit.toFixed(2) }}$</p>
         <p>Win Rate: {{ dataTrades.winRate.toFixed(2) }}%</p>
         <p>Avg Spread: {{ dataTrades.avgSpread.toFixed(2) }}%</p>
+        <p>Avg Total Tips: {{ dataTrades.avgTips.toFixed(2) }}%</p>
         <p>Avg Land Time: {{ dataTrades.avgLandTime.toFixed(2) }}s</p>
         <v-btn
           variant="flat"
@@ -127,6 +128,7 @@
             <h2>Тип арбитража</h2>
             <h2>Объем</h2>
             <h2>Профит</h2>
+            <h2>Ком-са</h2>
             <h2>Спред</h2>
             <h2>Время ленда</h2>
             <h2>Время ордера</h2>
@@ -142,6 +144,7 @@
             </h3>
             <h3>{{ trade.size.toFixed(2) }}</h3>
             <h3>{{ trade.profit.toFixed(2) }}</h3>
+            <h3>{{ getTotalTrade(trade).toFixed(2) }}</h3>
             <h3>{{ trade.spread.toFixed(2) }}</h3>
             <h3>{{ trade.land_time }}</h3>
             <h3>{{ trade.order_time }}</h3>
@@ -191,6 +194,7 @@ export default {
       let profit = 0
       let avgSpread = 0
       let avgLandTime = 0
+      let avgTips = 0
 
       let profitCount = 0
       let lossCount = 0
@@ -199,6 +203,7 @@ export default {
         trades.forEach(trade => {
           profit += trade.profit
           avgSpread += trade.spread
+          avgTips += (trade.tips + trade.nozomi_tips) || 0;
           if (trade.land_time !== '-') avgLandTime += trade.land_time
 
           if (trade.profit > 0) profitCount += 1
@@ -213,6 +218,7 @@ export default {
         profit: profit || 0,
         avgSpread: (avgSpread / trades.length) || 0,
         avgLandTime: (avgLandTime / trades.length) || 0,
+        avgTips: (avgTips / trades.length) || 0,
         winRate: winRate || 0
       }
     },
@@ -288,6 +294,10 @@ export default {
         console.error('Error fetchTrades:', e);
       }
     },
+    getTotalTrade(trade) {
+      const { tips, nozomi_tips } = trade
+      return tips + nozomi_tips || 0;
+    },
     watchTrades() {
       setInterval(async () => {
         await this.fetchTrades()
@@ -310,6 +320,7 @@ export default {
         'Тип арбитража': trade.type === 'default' ? 'Прямой' : 'Обратный',
         'Объем': trade.size,
         'Профит': trade.profit.toFixed(2),
+        'Ком-са': this.getTotalTrade(trade).toFixed(2),
         'Спред': trade.spread.toFixed(2),
         'Время ленда': trade.land_time,
         'Время ордера': trade.order_time,
@@ -328,7 +339,7 @@ export default {
 }
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .title {
   button {
     margin-top: 8px;
@@ -355,7 +366,7 @@ export default {
 .filters {
   position: relative;
   display: grid;
-  width: 70%;
+  width: 80%;
   justify-content: center;
   margin: 16px auto 0;
   gap: 12px;
@@ -379,7 +390,7 @@ export default {
 }
 
 .list {
-  width: 70%;
+  width: 80%;
   margin: 32px auto 0;
 
   &-notfound {
@@ -393,7 +404,7 @@ export default {
 
   &__trade {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
     gap: 12px;
     margin-bottom: 10px;
 

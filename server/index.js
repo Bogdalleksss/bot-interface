@@ -2,15 +2,18 @@ import express from 'express';
 import { connect, set } from 'mongoose';
 const cors = require('cors');
 import TradeModel from "./models/trade.model";
+import HistoryModel from "./models/history.model";
 // import socketIO from "socket.io";
 
 export default (app) => {
   // mongodb://Admin8host:bogdanzahodi@139.180.195.205:27017/arb_bot_newbd
   // mongodb://Admin8host:bogdanzahodi@139.180.195.205:27017/arb_bot_newbd
   set("strictQuery", false)
+  // connect('mongodb://localhost:27017/arb_bot_newbd1')
   connect('mongodb://admin:QGfcYjT0O-Kgf4Y@2.57.215.208:27017/arb_bot_newbd12334')
     .then(() => console.log('MongoDB is connected!'));
 
+  // connect('mongodb://admin:QGfcYjT0O-Kgf4Y@2.57.215.208:27017/arb_bot_newbd12334')
 
   // db.createUser({
   //   user: "admin",
@@ -32,6 +35,10 @@ export default (app) => {
   app.get('/trades', async (req, res) => {
     const trades = await TradeModel.find({})
     res.json(trades);
+  });
+  app.get('/history', async (req, res) => {
+    const history = await HistoryModel.find({})
+    res.json(history);
   });
   //
   // app.post('/bar', (req, res) => {
