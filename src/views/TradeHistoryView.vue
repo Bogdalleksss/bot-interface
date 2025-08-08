@@ -1,156 +1,204 @@
 <template>
   <div class="page">
-      <div class="title">
-        <h1>История торгов</h1>
-        <p>Total Profit: {{ dataTrades.profit.toFixed(2) }}$</p>
-        <p>Win Rate: {{ dataTrades.winRate.toFixed(2) }}%</p>
-        <p>Avg Spread: {{ dataTrades.avgSpread.toFixed(2) }}%</p>
-        <p>Avg Total Tips: {{ dataTrades.avgTips.toFixed(2) }}%</p>
-        <p>Avg Land Time: {{ dataTrades.avgLandTime.toFixed(2) }}s</p>
-        <v-btn
+    <div class="title">
+      <h1>История торгов</h1>
+      <p>Total Profit: {{ (dataTrades.profit - dataTrades.totalTips - dataTrades.totalFee).toFixed(2) }}$</p>
+      <p>Win Rate: {{ dataTrades.winRate.toFixed(2) }}%</p>
+      <p>Avg Spread: {{ dataTrades.avgSpread.toFixed(2) }}%</p>
+      <p>Avg Tips: {{ dataTrades.avgTips.toFixed(2) }}$</p>
+      <p>Total Tips: {{ dataTrades.totalTips.toFixed(2) }}$</p>
+      <p>Total Spot Fee: {{ dataTrades.totalFee.toFixed(3) }}$</p>
+      <p>Avg Land Time: {{ dataTrades.avgLandTime.toFixed(2) }}s</p>
+      <v-btn
           variant="flat"
           color="green"
           @click="exportTable"
-        >
-          Экпортировать табилцу
-        </v-btn>
-      </div>
-      <div class="filters">
-        <v-select
-            v-model="arbType"
-            label="Тип арбитража"
-            :items="['Все', 'Прямой', 'Обратный']"
-            variant="outlined"
-        ></v-select>
-        <v-select
-            v-model="selectedCoinsFilter"
-            label="Монеты"
-            :items="coinsSelectList"
-            multiple
-            variant="outlined"
-        >
-          <template v-slot:selection="{ item, index }">
-            <v-chip v-if="index < 1">
-              <span>{{ item.title }}</span>
-            </v-chip>
-            <span
-                v-if="index === 1"
-                class="text-grey text-caption align-self-center"
-            >
+      >
+        Экпортировать табилцу
+      </v-btn>
+    </div>
+    <div class="filters">
+      <v-select
+          v-model="arbType"
+          label="Тип арбитража"
+          :items="['Все', 'Прямой', 'Обратный']"
+          variant="outlined"
+      ></v-select>
+      <v-select
+          v-model="selectedCoinsFilter"
+          label="Монеты"
+          :items="coinsSelectList"
+          multiple
+          variant="outlined"
+      >
+        <template v-slot:selection="{ item, index }">
+          <v-chip v-if="index < 1">
+            <span>{{ item.title }}</span>
+          </v-chip>
+          <span
+              v-if="index === 1"
+              class="text-grey text-caption align-self-center"
+          >
               (+{{ selectedCoinsFilter.length - 1 }} others)
             </span>
-          </template>
-        </v-select>
-        <v-select
-            v-model="selectedMarketsFilter"
-            label="Биржа"
-            :items="marketsSelectList"
-            multiple
-            variant="outlined"
-        >
-          <template v-slot:selection="{ item, index }">
-            <v-chip v-if="index < 1">
-              <span>{{ item.title }}</span>
-            </v-chip>
-            <span
-                v-if="index === 1"
-                class="text-grey text-caption align-self-center"
-            >
-              (+{{ selectedMarketsFilter.length - 1 }} others)
-            </span>
-          </template>
-        </v-select>
-        <DateField
-            :value="dateFrom"
-            @change="(val) => dateFrom = val"
-            label="Дата от"
-        />
-        <DateField
-            :value="dateTo"
-            @change="(val) => dateTo = val"
-            label="Дата до"
-        />
-        <v-menu :close-on-content-click="false">
-          <template v-slot:activator="{ props }">
-            <v-btn
-                icon="mdi-sort-reverse-variant"
-                variant="outlined"
-                rounded="xs"
-                width="56px"
-                height="56px"
-                v-bind="props"
-            />
-          </template>
-
-          <v-list>
-            <v-btn-toggle class="filters-group" v-model="filter">
-              <v-btn>По увеличению даты</v-btn>
-              <v-btn>По уменьшению даты</v-btn>
-              <v-divider></v-divider>
-              <v-btn>По увеличению объема</v-btn>
-              <v-btn>По уменьшению объема</v-btn>
-              <v-divider></v-divider>
-              <v-btn>По увеличению профита</v-btn>
-              <v-btn>По уменьшению профита</v-btn>
-              <v-divider></v-divider>
-              <v-btn>По увеличению спреда</v-btn>
-              <v-btn>По уменьшению спреда</v-btn>
-              <v-divider></v-divider>
-              <v-btn>По увеличению времени ленда</v-btn>
-              <v-btn>По уменьшению времени ленда</v-btn>
-              <v-divider></v-divider>
-              <v-btn>По увеличению времени ордера</v-btn>
-              <v-btn>По уменьшению времени ореда</v-btn>
-            </v-btn-toggle>
-          </v-list>
-        </v-menu>
-      </div>
-
-      <div class="list">
-        <div v-if="!tradesSorted.length" class="list-notfound">
-          <p v-if="isSettedFilters">Нет по заданным параметрам ордеров</p>
-          <p v-else>Ордеров нет</p>
+        </template>
+      </v-select>
+      <DateField
+          :value="dateFrom"
+          @change="(val) => dateFrom = val"
+          label="Дата от"
+      />
+      <DateField
+          :value="dateTo"
+          @change="(val) => dateTo = val"
+          label="Дата до"
+      />
+      <v-menu :close-on-content-click="false">
+        <template v-slot:activator="{ props }">
           <v-btn
-            v-if="isSettedFilters"
-            rounded="lg"
-            variant="outlined"
-            color="blue"
-            @click="clearFilters"
-          >
-            Очистить фильтры
-          </v-btn>
-        </div>
-        <div v-else>
-          <div class="list__trade head">
-            <h2>Монета</h2>
-            <h2>Биржа</h2>
-            <h2>Дата</h2>
-            <h2>Тип арбитража</h2>
-            <h2>Объем</h2>
-            <h2>Профит</h2>
-            <h2>Ком-са</h2>
-            <h2>Спред</h2>
-            <h2>Время ленда</h2>
-            <h2>Время ордера</h2>
+              icon="mdi-sort-reverse-variant"
+              variant="outlined"
+              rounded="xs"
+              width="56px"
+              height="56px"
+              v-bind="props"
+          />
+        </template>
+
+        <v-list>
+          <v-btn-toggle class="filters-group" v-model="filter">
+            <v-btn>По увеличению даты</v-btn>
+            <v-btn>По уменьшению даты</v-btn>
+            <v-divider></v-divider>
+            <v-btn>По увеличению объема</v-btn>
+            <v-btn>По уменьшению объема</v-btn>
+            <v-divider></v-divider>
+            <v-btn>По увеличению профита</v-btn>
+            <v-btn>По уменьшению профита</v-btn>
+            <v-divider></v-divider>
+            <v-btn>По увеличению спреда</v-btn>
+            <v-btn>По уменьшению спреда</v-btn>
+            <v-divider></v-divider>
+            <v-btn>По увеличению времени ленда</v-btn>
+            <v-btn>По уменьшению времени ленда</v-btn>
+            <v-divider></v-divider>
+            <v-btn>По увеличению времени ордера</v-btn>
+            <v-btn>По уменьшению времени ореда</v-btn>
+          </v-btn-toggle>
+        </v-list>
+      </v-menu>
+    </div>
+
+    <div class="markets">
+      <v-btn
+          v-for="market in marketsSelectList"
+          :key="market"
+          color="#2196f3"
+          :variant="this.selectedMarketsFilter.includes(market) ? 'tonal' : 'outlined'"
+          @click="selectMarket(market)"
+      >
+        {{ market }}
+      </v-btn>
+    </div>
+
+    <div class="markets">
+      <v-tabs
+          v-model="tab"
+          class="tabs"
+      >
+        <v-tab value="history">История торговли</v-tab>
+        <v-tab value="stats">Статистика по монет</v-tab>
+      </v-tabs>
+    </div>
+
+    <v-tabs-window v-model="tab">
+      <v-tabs-window-item value="history">
+        <div class="list">
+          <div v-if="!tradesSorted.length" class="list-notfound">
+            <p v-if="isSettedFilters">Нет по заданным параметрам ордеров</p>
+            <p v-else>Ордеров нет</p>
+            <v-btn
+                v-if="isSettedFilters"
+                rounded="lg"
+                variant="outlined"
+                color="blue"
+                @click="clearFilters"
+            >
+              Очистить фильтры
+            </v-btn>
           </div>
-          <div class="list__trade" v-for="trade in tradesSorted" :key="trade._id">
-            <h3>{{ trade.token }}</h3>
-            <h3>{{ trade.market }}</h3>
-            <h3 class="date">{{ getFormatTime(trade.timestamp) }}</h3>
-            <h3>
-              <a target="_blank" :href="`https://solscan.io/tx/${trade.txid}`">
-                {{ trade.type === 'default' ? 'Прямой' : 'Обратный' }}
-              </a>
-            </h3>
-            <h3>{{ trade.size.toFixed(2) }}</h3>
-            <h3>{{ trade.profit.toFixed(2) }}</h3>
-            <h3>{{ getTotalTrade(trade).toFixed(2) }}</h3>
-            <h3>{{ trade.spread.toFixed(2) }}</h3>
-            <h3>{{ trade.land_time }}</h3>
-            <h3>{{ trade.order_time }}</h3>
+          <div v-else>
+            <div class="list__trade head">
+              <h2>Монета</h2>
+              <h2>Биржа</h2>
+              <h2>Дата</h2>
+              <h2>Тип арбитража</h2>
+              <h2>Объем</h2>
+              <h2>Профит</h2>
+              <h2>Ком-са</h2>
+              <h2>Ком-са спот</h2>
+              <h2>Спред</h2>
+              <h2>Время ленда</h2>
+              <h2>Время ордера</h2>
+            </div>
+            <div class="list__trade" v-for="trade in tradesSorted" :key="trade._id">
+              <h3>{{ trade.token }}</h3>
+              <h3>{{ trade.market }}</h3>
+              <h3 class="date">{{ getFormatTime(trade.timestamp) }}</h3>
+              <h3>
+                <a target="_blank" :href="`https://solscan.io/tx/${trade.txid}`">
+                  {{ trade.type === 'default' ? 'Прямой' : 'Обратный' }}
+                </a>
+              </h3>
+              <h3>{{ trade.size.toFixed(2) }}</h3>
+              <h3>{{ trade.profit.toFixed(2) }}</h3>
+              <h3>{{ getTotalTrade(trade).toFixed(2) }}</h3>
+              <h3>{{ (trade.order_fee && trade.order_fee !== '-') ? trade.order_fee.toFixed(4) : 0 }}</h3>
+              <h3>{{ trade.spread.toFixed(2) }}</h3>
+              <h3>{{ trade.land_time }}</h3>
+              <h3>{{ trade.order_time }}</h3>
+            </div>
           </div>
         </div>
-      </div>
+      </v-tabs-window-item>
+
+      <v-tabs-window-item value="stats">
+        <div class="list">
+          <div v-if="!tradesSorted.length" class="list-notfound">
+            <p v-if="isSettedFilters">Нет по заданным параметрам активности</p>
+            <p v-else>Активности нет</p>
+            <v-btn
+                v-if="isSettedFilters"
+                rounded="lg"
+                variant="outlined"
+                color="blue"
+                @click="clearFilters"
+            >
+              Очистить фильтры
+            </v-btn>
+          </div>
+          <div v-else>
+            <div class="list__trade stats head">
+              <h2>Монета</h2>
+              <h2>Биржа</h2>
+              <h2>Количество сделок</h2>
+              <h2>Профит</h2>
+              <h2>Средний объем</h2>
+              <h2>Средний спред</h2>
+            </div>
+            <div class="list__trade stats" v-for="stat in stats" :key="stat.symbol">
+              <h3>{{ stat.symbol }}</h3>
+              <h3>{{ stat.market }}</h3>
+              <h3>{{ stat.count }}</h3>
+              <h3>{{ stat.profit.toFixed(2) }}</h3>
+              <h3>{{ stat.avgSize.toFixed(2) }}</h3>
+              <h3>{{ stat.avgSpread.toFixed(2) }}</h3>
+            </div>
+          </div>
+        </div>
+      </v-tabs-window-item>
+    </v-tabs-window>
+
   </div>
 </template>
 
@@ -165,7 +213,9 @@ export default {
   data() {
     return {
       dateFrom: new Date(),
+      markets: [],
       dateTo: null,
+      tab: 'history',
       filter: null,
       arbType: null,
       trades: [],
@@ -176,6 +226,8 @@ export default {
   async mounted() {
     await this.fetchTrades()
     await this.watchTrades()
+
+    this.selectMarket(this.marketsSelectList[0])
 
     const now = new Date();
     this.dateFrom = new Date(
@@ -195,6 +247,7 @@ export default {
       let avgSpread = 0
       let avgLandTime = 0
       let avgTips = 0
+      let totalFee = 0
 
       let profitCount = 0
       let lossCount = 0
@@ -203,8 +256,11 @@ export default {
         trades.forEach(trade => {
           profit += trade.profit
           avgSpread += trade.spread
-          avgTips += (trade.tips + trade.nozomi_tips) || 0;
+          if (![trade.tips, trade.nozomi_tips].includes('-'))
+            avgTips += (trade.tips + trade.nozomi_tips) || 0;
           if (trade.land_time !== '-') avgLandTime += trade.land_time
+
+          if (trade.order_fee !== '-' && trade.order_fee) totalFee += trade.order_fee
 
           if (trade.profit > 0) profitCount += 1
           else if (trade.profit <= 0) lossCount += 1
@@ -213,12 +269,15 @@ export default {
 
       const totalCount = profitCount + lossCount;
       const winRate = (profitCount / totalCount) * 100;
+      // alert(totalFee)
 
       return {
         profit: profit || 0,
         avgSpread: (avgSpread / trades.length) || 0,
         avgLandTime: (avgLandTime / trades.length) || 0,
         avgTips: (avgTips / trades.length) || 0,
+        totalTips: avgTips,
+        totalFee: totalFee || 0,
         winRate: winRate || 0
       }
     },
@@ -232,6 +291,39 @@ export default {
     marketsSelectList() {
       const markets = this.trades.map(i => i.market)
       return [...new Set(markets)];
+    },
+    stats() {
+      const stats = []
+
+      this.coinsSelectList.forEach(coin => {
+        this.marketsSelectList.forEach(market => {
+          const trades = this.tradesFilters.filter(t => t.token === coin && t.market === market)
+
+          const count = trades.length
+          let profitSum = 0
+          let spread = 0
+          let size = 0
+
+          trades.forEach(t => {
+            profitSum += t.profit
+            spread += t.spread
+            size += t.size
+          })
+
+          if (count) {
+            stats.push({
+              symbol: coin,
+              profit: profitSum,
+              avgSpread: spread / count || 0,
+              avgSize: size / count || 0,
+              market,
+              count,
+            })
+          }
+        })
+      })
+
+      return stats.sort((a, b) => b.count - a.count)
     },
     tradesFilters() {
       return this.trades.filter(trade => {
@@ -294,8 +386,16 @@ export default {
         console.error('Error fetchTrades:', e);
       }
     },
+    selectMarket(market) {
+      if (this.selectedMarketsFilter.find(i => i === market)) {
+        this.selectedMarketsFilter = this.selectedMarketsFilter.filter(i => i !== market)
+      } else {
+        this.selectedMarketsFilter.push(market)
+      }
+    },
     getTotalTrade(trade) {
       const { tips, nozomi_tips } = trade
+      if ([tips, nozomi_tips].includes('-')) return 0
       return tips + nozomi_tips || 0;
     },
     watchTrades() {
@@ -321,12 +421,11 @@ export default {
         'Объем': trade.size,
         'Профит': trade.profit.toFixed(2),
         'Ком-са': this.getTotalTrade(trade).toFixed(2),
+        'Ком-са спот': trade.order_fee && trade.order_fee !== '-' ? trade.order_fee.toFixed(4) : 0,
         'Спред': trade.spread.toFixed(2),
         'Время ленда': trade.land_time,
         'Время ордера': trade.order_time,
       }))
-
-      console.log(rows);
 
       const worksheet = XLSX.utils.json_to_sheet(rows);
 
@@ -363,14 +462,31 @@ export default {
   }
 }
 
-.filters {
+.markets {
   position: relative;
-  display: grid;
-  width: 80%;
+  display: flex;
+  width: 90%;
   justify-content: center;
   margin: 16px auto 0;
   gap: 12px;
-  grid-template-columns: 1fr 1fr 1fr 1fr 1fr 56px;
+
+  .tabs {
+    width: 100%;
+  }
+
+  button {
+    flex: 1
+  }
+}
+
+.filters {
+  position: relative;
+  display: grid;
+  width: 90%;
+  justify-content: center;
+  margin: 16px auto 0;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr 1fr 1fr 56px;
 
   .v-input__control {
     height: 61px;
@@ -390,7 +506,7 @@ export default {
 }
 
 .list {
-  width: 80%;
+  width: 90%;
   margin: 32px auto 0;
 
   &-notfound {
@@ -404,9 +520,13 @@ export default {
 
   &__trade {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
     gap: 12px;
     margin-bottom: 10px;
+
+    &.stats {
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    }
 
     &.head {
       margin-bottom: 8px;
@@ -439,6 +559,7 @@ export default {
       line-height: 18px;
       display: flex;
       align-items: center;
+      justify-content: center;
     }
   }
 }

@@ -6,6 +6,7 @@ const HistorySchema = new mongoose.Schema({
   _id: ObjectId,
   ticker: String,
   market: String,
+  timestamp: Number,
   fee: {
     type: Number,
     default: 0
@@ -23,4 +24,4 @@ const HistorySchema = new mongoose.Schema({
 
 const HistoryModel = mongoose.model('HistoryModel', HistorySchema);
 
-module.exports = HistoryModel
+module.exports = { HistoryModel, HistorySchema }

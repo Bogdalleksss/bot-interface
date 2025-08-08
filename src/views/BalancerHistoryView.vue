@@ -60,6 +60,16 @@
             </span>
         </template>
       </v-select>
+      <DateField
+          :value="dateFrom"
+          @change="(val) => dateFrom = val"
+          label="Дата от"
+      />
+      <DateField
+          :value="dateTo"
+          @change="(val) => dateTo = val"
+          label="Дата до"
+      />
 <!--      <v-menu :close-on-content-click="false">-->
 <!--        <template v-slot:activator="{ props }">-->
 <!--          <v-btn-->
@@ -139,12 +149,16 @@
 </template>
 
 <script>
+import DateField from "@/components/DateField";
 import axios from "axios";
 import moment from "moment";
 import XLSX from "xlsx";
 
 export default {
   name: "BalancerHistoryView",
+  components: {
+    DateField
+  },
   data() {
     return {
       dateFrom: new Date(),
@@ -218,16 +232,16 @@ export default {
     },
     tradesFilters() {
       return this.trades.filter(trade => {
-        // const dateTo = new Date(this.dateTo).getTime()
-        // const dateFrom = new Date(this.dateFrom).getTime()
+        const dateTo = new Date(this.dateTo).getTime()
+        const dateFrom = new Date(this.dateFrom).getTime()
         const conditions = []
         const typeTx = {
           'Депозит': 'deposit',
           'Вывод': 'withdraw',
         }
 
-        // if (dateTo) conditions.push(dateTo > trade.timestamp)
-        // if (dateFrom) conditions.push(dateFrom < trade.timestamp)
+        if (dateTo) conditions.push(dateTo > trade.timestamp)
+        if (dateFrom) conditions.push(dateFrom < trade.timestamp)
         if (this.selectedCoinsFilter.length) conditions.push(this.selectedCoinsFilter.includes(trade.ticker))
         if (this.selectedMarketsFilter.length) conditions.push(this.selectedMarketsFilter.includes(trade.market))
         if (this.arbType && this.arbType.toLowerCase() !== 'все') {
@@ -271,6 +285,7 @@ export default {
   methods: {
     async fetchTrades() {
       try {
+        // http://185.233.187.84:3000/history
         const { data } = await axios.get('http://185.233.187.84:3000/history')
         this.trades = data;
       } catch (e) {
@@ -348,7 +363,7 @@ export default {
   justify-content: center;
   margin: 16px auto 0;
   gap: 12px;
- grid-template-columns: 1fr 1fr 1fr; //
+ grid-template-columns: 1fr 1fr 1fr 1fr 1fr; //
 
   .v-input__control {
     height: 61px;
@@ -382,7 +397,7 @@ export default {
 
   &__trade {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr; //1fr 1fr 1fr 1fr 1fr
+    grid-template-columns: 1fr 1fr 1fr 1fr; //1fr 1fr 1fr
     gap: 12px;
     margin-bottom: 10px;
 

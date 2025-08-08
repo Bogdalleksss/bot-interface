@@ -20,6 +20,7 @@ const TradeSchema = new mongoose.Schema({
   order_time: Mixed,
   tips: Mixed,
   nozomi_tips: Mixed,
+  order_fee: Mixed,
   txid: String,
   status: {
     type: String,
@@ -30,4 +31,4 @@ const TradeSchema = new mongoose.Schema({
 
 const TradeModel = mongoose.model('TradeModel', TradeSchema);
 
-module.exports = TradeModel
+module.exports = { TradeModel, TradeSchema }
