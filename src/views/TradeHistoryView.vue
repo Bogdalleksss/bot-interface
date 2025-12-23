@@ -182,6 +182,7 @@
               <h2>Монета</h2>
               <h2>Биржа</h2>
               <h2>Количество сделок</h2>
+              <h2>Win Rate</h2>
               <h2>Профит</h2>
               <h2>Средний объем</h2>
               <h2>Средний спред</h2>
@@ -190,6 +191,7 @@
               <h3>{{ stat.symbol }}</h3>
               <h3>{{ stat.market }}</h3>
               <h3>{{ stat.count }}</h3>
+              <h3>{{ stat.winRate.toFixed(2) }}</h3>
               <h3>{{ stat.profit.toFixed(2) }}</h3>
               <h3>{{ stat.avgSize.toFixed(2) }}</h3>
               <h3>{{ stat.avgSpread.toFixed(2) }}</h3>
@@ -210,6 +212,12 @@ import XLSX from "xlsx";
 
 export default {
   components: { DateField },
+  props: {
+    serverId: {
+      type: String,
+      default: ''
+    }
+  },
   data() {
     return {
       dateFrom: new Date(),
@@ -304,10 +312,14 @@ export default {
           let spread = 0
           let size = 0
 
+          let profitCount = 0
+
           trades.forEach(t => {
             profitSum += t.profit
             spread += t.spread
             size += t.size
+
+            if (t.profit > 0) profitCount += 1
           })
 
           if (count) {
@@ -316,6 +328,7 @@ export default {
               profit: profitSum,
               avgSpread: spread / count || 0,
               avgSize: size / count || 0,
+              winRate: (profitCount / count)*100 || 0,
               market,
               count,
             })
@@ -380,7 +393,8 @@ export default {
   methods: {
     async fetchTrades() {
       try {
-        const { data } = await axios.get('http://185.233.187.84:3000/trades')
+        const { data } = await axios.get(`http://localhost:3000/trades/${this.serverId}`)
+        console.log(data);
         this.trades = data;
       } catch (e) {
         console.error('Error fetchTrades:', e);
@@ -525,7 +539,7 @@ export default {
     margin-bottom: 10px;
 
     &.stats {
-      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+      grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr 1fr;
     }
 
     &.head {
